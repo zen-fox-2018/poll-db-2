@@ -24,17 +24,18 @@ function findVote() {
         ORDER BY Politicians.grade_current`
     showResult(query)
 }
-// findVote()
+findVote()
 
 function whoVotesTheMostVoted() {
     let query = `
         SELECT 
-            top.totalVote,
-            top.politicianName,
+            topPolitician.totalVote,
+            topPolitician.politicianName,
             Voters.first_name||" "||Voters.last_name AS voterName,
             Voters.gender
         FROM 
-            (SELECT 
+            (
+            SELECT 
                 COUNT(Votes.politicianId) AS totalVote,
                 Politicians.name AS politicianName,
                 Politicians.id 
@@ -43,17 +44,18 @@ function whoVotesTheMostVoted() {
             ON Votes.politicianId = Politicians.id
             GROUP BY Votes.politicianId
             ORDER BY totalVote DESC
-            LIMIT 3) AS top
+            LIMIT 3
+            ) AS topPolitician
         JOIN Votes
         JOIN Voters
-        ON Votes.politicianId = top.id
+        ON Votes.politicianId = topPolitician.id
             AND Voters.id = Votes.voterId
         GROUP BY voterName
-        ORDER BY top.totalVote DESC, top.politicianName
+        ORDER BY topPolitician.totalVote DESC, topPolitician.politicianName
         `    
     showResult(query)
 }
-// whoVotesTheMostVoted();
+whoVotesTheMostVoted();
 
 
 function whoCheated() {
