@@ -13,19 +13,36 @@ class Operations {
   }
 
   static numberTwo() {
+    // const query = `
+    //               WITH countVotes AS (
+    //               SELECT politicianId,
+    //                 COUNT(politicianId) AS 'totalVote'
+    //               FROM votes
+    //               GROUP BY politicianId
+    //               ORDER BY totalVote DESC
+    //               LIMIT 3
+    //               )
+    //               SELECT countVotes.totalVote, politicians.name AS politicianName, voters.first_name || ' ' || voters.last_name AS voterName, voters.gender
+    //               FROM countVotes, voters, votes, politicians
+    //               WHERE countVotes.politicianId = votes.politicianId AND countVotes.politicianId = politicians.id AND votes.voterId = voters.id
+    //               ORDER BY countVotes.totalVote DESC;
+    //               `;
     const query = `
-                  WITH countVotes AS (
-                  SELECT politicianId,
+              SELECT top.totalVote, politicians.name AS politicianName, voters.first_name || ' ' || voters.last_name AS voterName, voters.gender
+              FROM
+                  (SELECT politicianId,
                     COUNT(politicianId) AS 'totalVote'
                   FROM votes
                   GROUP BY politicianId
                   ORDER BY totalVote DESC
-                  LIMIT 3
-                  )
-                  SELECT countVotes.totalVote, politicians.name AS politicianName, voters.first_name || ' ' || voters.last_name AS voterName, voters.gender
-                  FROM voters, votes, politicians, countVotes
-                  WHERE votes.voterId = voters.id AND votes.politicianId = politicians.id AND votes.politicianId = countVotes.politicianId
-                  ORDER BY countVotes.totalVote DESC, politicianName ASC;
+                  LIMIT 3) AS top
+              JOIN votes
+                  ON top.politicianId = votes.politicianId
+              JOIN politicians
+                  ON top.politicianId = politicians.id
+              JOIN voters
+                  ON votes.voterId = voters.id
+              ORDER BY top.totalVote DESC;
                   `;
     db.all(query, (err, data) => {
       if (err) {
