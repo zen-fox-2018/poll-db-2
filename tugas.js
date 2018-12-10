@@ -1,5 +1,6 @@
 const db = require('./datab')
 const Table = require('cli-table')
+
 function satu() {
   let table = new Table({
     chars: { 'top': '═' , 'top-mid': '╤' , 'top-left': '╔' , 'top-right': '╗'
@@ -7,11 +8,24 @@ function satu() {
            , 'left': '║' , 'left-mid': '╟' , 'mid': '─' , 'mid-mid': '┼'
            , 'right': '║' , 'right-mid': '╢' , 'middle': '│' }
   });
-  db.all(`SELECT name, location, grade_current, COUNT(*) AS totalVotes FROM Politicians
-  JOIN Votes ON Politicians.id = Votes.politicianId
-  GROUP BY name
-  HAVING grade_current < 9
-  ORDER BY grade_current asc` , (err, rows) => {
+  let query = `
+    SELECT 
+      name, 
+      location, 
+      grade_current, 
+      COUNT(*) AS totalVotes 
+    FROM 
+      Politicians
+    JOIN 
+      Votes ON Politicians.id = Votes.politicianId
+    GROUP BY 
+      name
+    HAVING 
+      grade_current < 9
+    ORDER BY 
+      grade_current asc` 
+
+  db.all(query , (err, rows) => {
     if(err){
       console.log(err)
     } else {
@@ -34,14 +48,35 @@ function dua() {
            , 'left': '║' , 'left-mid': '╟' , 'mid': '─' , 'mid-mid': '┼'
            , 'right': '║' , 'right-mid': '╢' , 'middle': '│' }
   });
-  db.all(`SELECT totalVote, politicianName, first_name || ' '|| last_name AS voterName , gender FROM (SELECT COUNT(*) AS totalVote, name AS politicianName , politicianId FROM Politicians 
-  JOIN Votes ON Politicians.id = Votes.politicianId
-  GROUP BY politicianName
-  ORDER BY totalVote desc
-  LIMIT 3) AS table1 
-  JOIN (SELECT * FROM Voters
-  JOIN Votes ON Voters.id = Votes.voterId) AS table2 ON table1.politicianId = table2.politicianId
-  ORDER BY totalVote desc, politicianName` , (err, rows) => {
+  
+  let query = `
+    SELECT 
+      totalVote, 
+      politicianName, 
+      first_name || ' '|| last_name AS voterName ,
+      gender 
+    FROM
+      (SELECT 
+          COUNT(*) AS totalVote, 
+          name AS politicianName , 
+          politicianId 
+        FROM 
+          Politicians 
+        JOIN 
+          Votes ON Politicians.id = Votes.politicianId
+        GROUP BY 
+          politicianName
+        ORDER BY 
+          totalVote desc
+        LIMIT 3) AS infoCandidates
+    JOIN 
+      (SELECT * FROM Voters
+      JOIN Votes ON Voters.id = Votes.voterId) AS infoVoters ON infoCandidates.politicianId = infoVoters.politicianId
+    ORDER BY 
+      totalVote desc, 
+      politicianName` 
+
+  db.all(query , (err, rows) => {
     if(err){
       console.log(err)
     } else {
@@ -65,11 +100,25 @@ function tiga() {
            , 'left': '║' , 'left-mid': '╟' , 'mid': '─' , 'mid-mid': '┼'
            , 'right': '║' , 'right-mid': '╢' , 'middle': '│' }
   });
-  db.all(`SELECT COUNT(*) AS totalVote ,first_name || ' ' || last_name AS name, gender , age FROM Voters
-  JOIN Votes ON Voters.id = Votes.voterId
-  GROUP BY name
-  HAVING totalVote > 1
-  ORDER BY totalVote desc` , (err, rows) => {
+
+  let query = `
+    SELECT 
+      COUNT(*) AS totalVote ,
+      first_name || ' ' || last_name AS name, 
+      gender , 
+      age 
+    FROM 
+      Voters
+    JOIN 
+      Votes ON Voters.id = Votes.voterId
+    GROUP BY 
+      name
+    HAVING 
+      totalVote > 1
+    ORDER BY 
+      totalVote desc`
+      
+  db.all(query , (err, rows) => {
     if(err){
       console.log(err)
     } else {
