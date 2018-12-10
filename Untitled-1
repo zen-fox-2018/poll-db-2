@@ -1,0 +1,20 @@
+SELECT 
+	TotalVote, 
+	table_politician.nama,
+	table_voter.first_name || " " || table_voter.last_name AS voterName,
+	table_voter.gender
+FROM 
+	(SELECT * 
+	 FROM Voters Vr 
+	 JOIN Votes Vt ON Vr.id = Vt.voter_id) AS table_voter
+JOIN
+	(SELECT 
+		 COUNT(*) AS TotalVote,
+		 P.nama,
+		 P.id 
+     FROM Politicians P 
+	 JOIN Votes Vt ON P.id = Vt.politician_id 
+	 JOIN Voters Vr ON Vt.voter_id = Vr.id
+     GROUP BY P.nama ORDER BY TotalVote DESC LIMIT 3) AS table_politician 
+ON table_voter.politician_id = table_politician.id 
+ORDER BY table_politician.nama DESC, TotalVote DESC
